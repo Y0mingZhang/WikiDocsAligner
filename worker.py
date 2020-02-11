@@ -55,17 +55,36 @@ def do_work(src_lang, target_lang, src_df, src_corpus, target_corpus, out_dir):
     print("\nwriting aligned documents completed successfully!")
 
 
-def load_corpus(corpus_dir):
+def load_corpus(corpus_dir, mode=None, arg=None):
     corpus = list()
-    for subdir, dirs, files in os.walk(corpus_dir):
-        for f in files:
-            wiki_file = os.path.join(subdir, f)
-            with open(wiki_file, encoding='utf-8') as wiki_reader:
-                text = wiki_reader.read()
-                soup = BeautifulSoup(text, 'html.parser')
-                docs = soup.find_all('doc')
-                for doc in docs:
-                    doc_id = doc.get('id')
-                    title = doc.get('title')
-                    corpus.append((doc_id, title, doc))
+    if mode == 'id':
+        for subdir, dirs, files in os.walk(corpus_dir):
+            for f in files:
+                wiki_file = os.path.join(subdir, f)
+                with open(wiki_file, encoding='utf-8') as wiki_reader:
+                    text = wiki_reader.read()
+                    soup = BeautifulSoup(text, 'html.parser')
+                    docs = soup.find_all('doc')
+                    for doc in docs:
+                        doc_id = doc.get('id')
+                        title = doc.get('title')
+                        if doc_id in arg:
+                            corpus.append((doc_id, title, doc))
+                            
+    elif mode == 'title':
+        for subdir, dirs, files in os.walk(corpus_dir):
+            for f in files:
+                wiki_file = os.path.join(subdir, f)
+                with open(wiki_file, encoding='utf-8') as wiki_reader:
+                    text = wiki_reader.read()
+                    soup = BeautifulSoup(text, 'html.parser')
+                    docs = soup.find_all('doc')
+                    for doc in docs:
+                        doc_id = doc.get('id')
+                        title = doc.get('title')
+                        if title in arg:
+                            corpus.append((doc_id, title, doc))
+    else:
+        raise ValueError
+
     return corpus

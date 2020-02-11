@@ -3,18 +3,27 @@ import sys
 import parse_sql_script
 import os
 import worker
+import shutil
 
 
-def main(src_lang, target_lang, src_ll_sql, src_corpus_dir, target_corpus_dir, out_dir):
+def main(src_lang, target_lang, src_ll_sql, src_corpus_dir, target_corpus_dir, out_dir, overwrite=False):
     print('source language:', src_lang)
     print('target language:', target_lang)
     print('source language links sql file', src_ll_sql)
     print('source corpus directory', src_corpus_dir)
     print('target corpus directory', target_corpus_dir)
     print('output directory', out_dir)
+    print('Force overwrite', args.overwrite)
+    
 
     src_path = os.path.join(out_dir, src_lang)
     target_path = os.path.join(out_dir, target_lang)
+    if (os.path.exists(src_path) or os.path.exists(target_path)):
+        if overwrite:
+            shutil.rmtree(out_dir)
+        else:
+            raise ValueError
+
     if not os.path.exists(src_path): os.makedirs(src_path)
     if not os.path.exists(target_path): os.makedirs(target_path)
 
@@ -22,8 +31,10 @@ def main(src_lang, target_lang, src_ll_sql, src_corpus_dir, target_corpus_dir, o
 
     print("inter-language links sql file loaded successfully")
 
-    src_corpus = worker.load_corpus(src_corpus_dir)
-    target_corpus = worker.load_corpus(target_corpus_dir)
+
+
+    src_corpus = worker.load_corpus(src_corpus_dir, mode='id', arg=set(src_df.ll_from))
+    target_corpus = worker.load_corpus(target_corpus_dir, mode='title', arg=set(src_df.ll_title))
     print("source and target corpus loaded successfully")
     worker.do_work(src_lang, target_lang, src_df, src_corpus, target_corpus, out_dir)
 
@@ -46,6 +57,7 @@ parser.add_argument('--sql-file', type=str, help='source language links sql file
 parser.add_argument('--src-corpus', type=str, help='source corpus directory.', required=True)
 parser.add_argument('--target-corpus', type=str, help='target corpus directory.', required=True)
 parser.add_argument('--out-dir', type=str, help='the output directory.', required=True)
+parser.add_argument('--overwrite', type=bool, action='store_true')
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -55,7 +67,7 @@ if __name__ == '__main__':
     src_corpus_dir = args.src_corpus
     target_corpus_dir = args.target_corpus
     out_dir = args.out_dir
-    main(src_lang, target_lang, src_ll_sql, src_corpus_dir, target_corpus_dir, out_dir)
+    main(src_lang, target_lang, src_ll_sql, src_corpus_dir, target_corpus_dir, out_dir, args.overwrite)
 
 '''
 
