@@ -13,7 +13,7 @@ def main(src_lang, target_lang, src_ll_sql, out_dir, overwrite=False):
     print('output directory', out_dir)
     print('Force overwrite', args.overwrite)
     
-    df_path = os.path.join(output_dir, '{}_{}_langlinks'.format(src_lang, target_lang))
+    df_path = os.path.join(out_dir, '{}_{}_langlinks'.format(src_lang, target_lang))
 
     if os.path.exists(df_path):
         if overwrite:
